@@ -1,61 +1,54 @@
+import os
+import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def get_data_generators(data_dir, image_size=(224, 224), batch_size=32, val_split=0.15):
-    """
-    Returns train, validation, and test data generators.
+def get_data_generators(data_dir, image_size=(224, 224), batch_size=32):
+    train_dir = os.path.join(data_dir, 'train')
+    test_dir = os.path.join(data_dir, 'test')
 
-    Parameters:
-        data_dir (str): Path to the dataset root directory containing 'train' and 'test' subfolders
-        image_size (tuple): Target size for images
-        batch_size (int): Batch size
-        val_split (float): Fraction of training data used for validation
-
-    Returns:
-        train_generator, val_generator, test_generator
-    """
-
-    # Paths
-    train_path = f"{data_dir}/train"
-    test_path = f"{data_dir}/test"
-
-    # Data augmentation for training
-    train_datagen = ImageDataGenerator(
+    train_val_datagen = ImageDataGenerator(
         rescale=1./255,
-        rotation_range=20,
-        zoom_range=0.2,
+        rotation_range=30,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        zoom_range=0.3,
+        shear_range=0.2,
+        brightness_range=(0.7, 1.3),
         horizontal_flip=True,
-        validation_split=val_split
+        vertical_flip=True,
+        fill_mode='nearest',
+        validation_split=0.2
     )
 
-    # No augmentation for test data
     test_datagen = ImageDataGenerator(rescale=1./255)
 
-    # Training and validation generators
-    train_generator = train_datagen.flow_from_directory(
-        train_path,
+    train_gen = train_val_datagen.flow_from_directory(
+        train_dir,
         target_size=image_size,
         batch_size=batch_size,
         class_mode='categorical',
-        subset='training',
-        shuffle=True
+        subset="training",
+        shuffle=True,
+        seed=42
     )
 
-    val_generator = train_datagen.flow_from_directory(
-        train_path,
+    val_gen = train_val_datagen.flow_from_directory(
+        train_dir,
         target_size=image_size,
         batch_size=batch_size,
         class_mode='categorical',
-        subset='validation',
-        shuffle=True
+        subset="validation",
+        shuffle=False,
+        seed=42
     )
 
-    # Test generator
-    test_generator = test_datagen.flow_from_directory(
-        test_path,
+    test_gen = test_datagen.flow_from_directory(
+        test_dir,
         target_size=image_size,
         batch_size=batch_size,
         class_mode='categorical',
-        shuffle=False
+        shuffle=False,
+        seed=42
     )
 
-    return train_generator, val_generator, test_generator
+    return train_gen, val_gen, test_gen

@@ -1,43 +1,23 @@
-import tensorflow as tf
-from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import BatchNormalization
 
-def create_mobilenetv2_model(input_shape=(224, 224, 3), num_classes=3, fine_tune_at=None):
-    """
-    Create a MobileNetV2-based model for transfer learning.
+def build_model(input_shape, num_classes):
+    base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=input_shape)
 
-    Args:
-        input_shape (tuple): Shape of input images.
-        num_classes (int): Number of classes to classify.
-        fine_tune_at (int or None): If specified, unfreezes the model from this layer index onward.
+    for layer in base_model.layers[:100]:
+        layer.trainable = False
+    for layer in base_model.layers[100:]:
+        layer.trainable = True
 
-    Returns:
-        tf.keras.Model: Compiled model ready for training.
-    """
-    base_model = MobileNetV2(input_shape=input_shape,
-                             include_top=False,
-                             weights="imagenet")
+    x = GlobalAveragePooling2D()(base_model.output)
+    x = Dropout(0.3)(x)
+    x = Dense(256, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.3)(x)
+    x = Dense(128, activation='LeakyReLU')(x)
+    output = Dense(num_classes, activation='softmax')(x)
 
-    base_model.trainable = False  # Freeze entire base model
-
-    # Unfreeze later layers if fine-tuning
-    if fine_tune_at is not None:
-        base_model.trainable = True
-        for layer in base_model.layers[:fine_tune_at]:
-            layer.trainable = False
-
-    inputs = tf.keras.Input(shape=input_shape)
-    x = preprocess_input(inputs)
-    x = base_model(x, training=False)
-    x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dropout(0.2)(x)
-    outputs = layers.Dense(num_classes, activation='softmax')(x)
-
-    model = models.Model(inputs, outputs)
-
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
-
+    model = Model(inputs=base_model.input, outputs=output)
     return model

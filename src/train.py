@@ -1,43 +1,57 @@
 import os
-from datetime import datetime
+import numpy as np
+import random
+import tensorflow as tf
+import pickle
+from collections import Counter
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from sklearn.utils.class_weight import compute_class_weight
 from data_loader import get_data_generators
-from model_builder import create_mobilenetv2_model
+from model_builder import build_model
 
-# 🔧 Settings
-DATA_DIR = "/Users/halakhalifa/Desktop/Advanced ML/olive-disease-detector/data"
-IMAGE_SIZE = (224, 224)
-BATCH_SIZE = 32
-EPOCHS = 10
-NUM_CLASSES = 3
-FINE_TUNE_AT = None  # Set to layer index if fine-tuning later
+# Set seeds
+SEED = 42
+np.random.seed(SEED)
+random.seed(SEED)
+tf.random.set_seed(SEED)
 
-# 📁 Create output folder if not exists
-MODEL_SAVE_DIR = "outputs/models"
-os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
+# Paths
+DATA_DIR = "data"
+MODEL_DIR = "outputs/models"
+HISTORY_DIR = "outputs/history"
+os.makedirs(MODEL_DIR, exist_ok=True)
+os.makedirs(HISTORY_DIR, exist_ok=True)
 
-# 📦 Load Data
-train_gen, val_gen, test_gen = get_data_generators(
-    data_dir=DATA_DIR,
-    image_size=IMAGE_SIZE,
-    batch_size=BATCH_SIZE
-)
+# Load data
+train_gen, val_gen, _ = get_data_generators(DATA_DIR, image_size=(224, 224), batch_size=32)
 
-# 🧠 Build Model
-model = create_mobilenetv2_model(
-    input_shape=IMAGE_SIZE + (3,),
-    num_classes=NUM_CLASSES,
-    fine_tune_at=FINE_TUNE_AT
-)
+# Class weights
+class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(train_gen.classes), y=train_gen.classes)
+class_weights = dict(enumerate(class_weights))
 
-# 🏋️‍♀️ Train
+# Build model
+model = build_model(input_shape=(224, 224, 3), num_classes=train_gen.num_classes)
+
+optimizer = tf.keras.optimizers.Adam(learning_rate=1e-04)
+model.compile(optimizer=optimizer,loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Callbacks
+callbacks = [
+    EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True),
+    ModelCheckpoint(f"{MODEL_DIR}/olive_leaf_disease_model.h5", save_best_only=True),
+    ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3),
+]
+
+# Train
 history = model.fit(
     train_gen,
-    epochs=EPOCHS,
-    validation_data=val_gen
+    epochs=30,
+    validation_data=val_gen,
+    class_weight=class_weights,
+    callbacks=callbacks
 )
+print(Counter(train_gen.classes))
 
-# 💾 Save model
-timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-model.save(os.path.join(MODEL_SAVE_DIR, f"mobilenetv2_{timestamp}.h5"))
-
-print(f"✅ Training complete. Model saved at {MODEL_SAVE_DIR}")
+# Save training history
+with open(f"{HISTORY_DIR}/history.pkl", "wb") as f:
+    pickle.dump(history.history, f)
