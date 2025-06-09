@@ -9,6 +9,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from data_loader import get_data_generators
 from model_builder import build_model
 
+
 # Set seeds
 SEED = 42
 np.random.seed(SEED)
