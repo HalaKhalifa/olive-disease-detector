@@ -1,5 +1,4 @@
 import os
-import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 def get_data_generators(data_dir, image_size=(224, 224), batch_size=32):
@@ -52,12 +51,3 @@ def get_data_generators(data_dir, image_size=(224, 224), batch_size=32):
     )
 
     return train_gen, val_gen, test_gen
-    
-def mixup_generator(generator, alpha=0.2):
-    while True:
-        x, y = next(generator)
-        indices = np.random.permutation(x.shape[0])
-        lam = np.random.beta(alpha, alpha)
-        x_mix = lam * x + (1 - lam) * x[indices]
-        y_mix = lam * y + (1 - lam) * y[indices]
-        yield x_mix, y_mix
