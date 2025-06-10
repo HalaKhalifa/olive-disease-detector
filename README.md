@@ -119,10 +119,52 @@ Upload an olive leaf image to get real-time predictions like this:
 
 ## 📌 TODO / Future Work
 
-- Mobile deployment (TFLite)
-- Collect more diverse olive leaf datasets and include more olive diseases
-- Real-time webcam inference
-- Multi-language support (Arabic UI)
-- Feedback system for farmers
+- [ ] 🧠 Improve model generalization by incorporating more diverse and balanced datasets.
+- [ ] 🪴 Add support for more olive diseases as new labeled data becomes available.
+- [ ] 📱 Develop a mobile app version for on-field usage.
+- [ ] 📚 Provide agricultural guides and actionable recommendations for managing each predicted disease.
+- [ ] 🇵🇸 Include localized support and Arabic translations to serve farmers in Palestine more directly.
+---
+## 🫱🏻‍🫲🏽 Collaboration
+
+We believe in collective innovation — and your ideas, skills, or feedback can make a real difference! Whether you're a student, developer, agronomist, designer, or activist, your contribution is welcome.
+
+### 🛠️ How to Contribute
+
+Want to contribute code, ideas, or improvements? Here's how you can get started:
+
+1. Fork this repository and clone it locally.
+2. Create a new branch for your feature:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Make your changes, then commit:
+   ```bash
+   git commit -m "Describe your contribution"
+   ```
+4. Push and open a Pull Request:
+   ```bash
+   git push origin feature-name
+   ```
+
+Ways you can contribute:
+
+- 🔧 Improve model architecture or training pipeline
+- 🧪 Add testing or evaluation scripts
+- 🖼️ Expand the dataset (new leaf samples, balanced classes)
+- 🌍 Translate the app (e.g., Arabic, French)
+- 🎨 Enhance the UI/UX of the web app (HTML/CSS)
+- 🩺 Add treatment and prevention suggestions for detected diseases
+- 📱 Help build a mobile-friendly or offline-compatible version
+
+### 🌿 Ways to Help (Non-Code)
+
+- Share the tool with Palestinian farmers or agritech communities
+- Contribute real images of olive leaves from your region
+- Recommend localized solutions or agricultural guides
+- Spread awareness and spark discussion about AI in agriculture for Palestine
+
+Together, we can empower Palestinian agriculture with AI and bring hope through technology.
+Let’s grow something meaningful — together.
 
 🕊️ For Gaza and Palestine 🌿🇵🇸
