@@ -8,7 +8,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLRO
 from sklearn.utils.class_weight import compute_class_weight
 from data_loader import get_data_generators
 from model_builder import build_model
-
+from keras.metrics import AUC, Precision, Recall, TopKCategoricalAccuracy
 
 # Set seeds
 SEED = 42
@@ -22,6 +22,13 @@ MODEL_DIR = "outputs/models"
 HISTORY_DIR = "outputs/history"
 os.makedirs(MODEL_DIR, exist_ok=True)
 os.makedirs(HISTORY_DIR, exist_ok=True)
+metrics = [
+    'accuracy',
+    AUC(name='roc_auc'),
+    Precision(name='precision'),
+    Recall(name='recall'),
+    TopKCategoricalAccuracy(k=2, name='top_2_acc'),
+]
 
 # Load data
 train_gen, val_gen, _ = get_data_generators(DATA_DIR, image_size=(224, 224), batch_size=32)
@@ -34,7 +41,7 @@ class_weights = dict(enumerate(class_weights))
 model = build_model(input_shape=(224, 224, 3), num_classes=train_gen.num_classes)
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=1e-04)
-model.compile(optimizer=optimizer,loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=metrics)
 
 # Callbacks
 callbacks = [
