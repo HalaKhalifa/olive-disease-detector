@@ -70,7 +70,7 @@ button:hover {
     margin-bottom: 1.5rem;
 }
 
-.footer-note {
+.footer {
     font-size: 0.85rem;
     margin-top: 2rem;
     color: #666;
@@ -86,4 +86,14 @@ button:hover {
     max-width: 400px;
     max-width: 360px;
     width: 90%;
+}
+
+.footer-note {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    color: #666;
+    text-align: center;
 }
