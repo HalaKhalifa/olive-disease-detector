@@ -70,7 +70,10 @@ plt.show()
 
 # Filters
 def visualize_filters(model, layer_index=1, max_filters=16):
-    filters, _ = model.layers[layer_index].get_weights()
+    filters = model.layers[layer_index].get_weights()[0]
+    if filters.ndim != 4:
+        print(f"Layer at index {layer_index} is not a Conv2D layer. Found shape: {filters.shape}")
+        return
     plt.figure(figsize=(10, 6))
     for i in range(min(filters.shape[-1], max_filters)):
         plt.subplot(4, 4, i+1)
@@ -78,11 +81,12 @@ def visualize_filters(model, layer_index=1, max_filters=16):
         f_mean = np.mean(f, axis=-1)
         plt.imshow(f_mean, cmap='gray')
         plt.axis('off')
-    plt.suptitle("First Convolutional Filters")
+    plt.suptitle(f"Filters of Layer {model.layers[layer_index].name}")
     plt.tight_layout()
     plt.savefig(f"{PLOT_DIR}/filters.png")
     plt.show()
-
+    
+visualize_filters(model, layer_index=1, max_filters=16)
 # Feature Maps
 sample_image = test_gen[0][0][0]
 for layer in model.layers[::-1]:
